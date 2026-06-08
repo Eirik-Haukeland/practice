@@ -13,7 +13,7 @@ func main() {
 	allowEscapes := false
 	index := 1
 itsText:
-	for len(args) >= index {
+	for len(args) > 1 && len(args) >= index {
 		flag := args[index]
 		if !strings.HasPrefix(flag, "-") {
 			break itsText
