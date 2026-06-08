@@ -48,8 +48,8 @@ Dette er en **oppførsels-test** (ikke ren diff mot ekte verktøy — `cd` er en
 uten stdout). Testen sammenligner din utskrift mot `(cd <arg> && pwd)` beregnet i bash.
 
 ```bash
-# stå i repo-rota
-go build -o /tmp/cd ./go/19-cd
+# bygg fra modulmappa (subshell holder cwd i rota), kjør testen fra rota
+(cd go/19-cd && go build -o /tmp/cd .)
 ./practise-project-descriptions/19-cd/test.sh /tmp/cd
 ```
 

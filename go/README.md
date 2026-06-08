@@ -51,15 +51,18 @@ func main() {
 cd go/01-echo
 go run . hei verden
 
-# Golden-test: bygg binær til absolutt sti, kjør testen fra repo-rota
+# Golden-test: bygg binær HER i modulmappa, kjør så testen fra repo-rota
+go build -o /tmp/echo .
 cd ../..        # tilbake til repo-rota
-go build -o /tmp/echo ./go/01-echo
 ./practise-project-descriptions/01-echo/test.sh /tmp/echo
 ```
 
 > Bygg til absolutt sti (`/tmp/echo`) i stedet for å sende `go run`-kommando som kandidat:
 > `find`- og `ls`-testene `cd`-er internt til en temp-mappe, så en relativ `go run`-sti
 > ville knekke. En binær med absolutt sti fungerer uansett.
+>
+> Bygg fra *inni* modulmappa — rota har ingen `go.mod` (repoet skal kunne romme flere
+> språk), så `go build ./go/01-echo` fra rota feiler med «cannot find main module».
 
 ## Tips
 

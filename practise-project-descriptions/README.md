@@ -11,16 +11,20 @@ Beskrivelsene og testene ligger her; selve Go-koden skriver du selv i `../go/<nn
 3. Skriv Go-implementasjonen i `../go/<nn>-<verktøy>/` (én modul per verktøy — se `../go/README.md`).
 4. Bygg en binær og kjør golden-testen. Stå i repo-rota (`practice/`):
    ```bash
-   # stå i repo-rota
-   go build -o /tmp/echo ./go/01-echo
+   # bygg fra modulmappa (subshell holder cwd i rota), kjør testen fra rota
+   (cd go/01-echo && go build -o /tmp/echo .)
    ./practise-project-descriptions/01-echo/test.sh /tmp/echo
    ```
    Testen kjører binæren din og systemets ekte verktøy mot samme input og `diff`-er output.
 5. Grønt? Gå videre. Vil du ha mer? Ta stretch-målene.
 
 > **Hvorfor binær og ikke `go run`?** Noen tester (`find`, `ls`) `cd`-er internt til en
-> temp-mappe, så en relativ `go run ./go/...`-sti ville knekke. En absolutt binær-sti
-> fungerer uansett hvor testen står. `go build -o /tmp/<navn>` er raskt nok i loopen.
+> temp-mappe, så en relativ `go run`-sti ville knekke. En absolutt binær-sti (`/tmp/<navn>`)
+> fungerer uansett hvor testen står.
+>
+> **Hvorfor `cd` inn i modulen for å bygge?** Rota har ingen `go.mod` (med vilje — repoet
+> skal kunne romme flere språk). `go build ./go/01-echo` fra rota feiler derfor med
+> «cannot find main module». Hver `go/xx-navn/` er sin egen modul, så bygg fra inni den.
 
 > **Sanity-sjekk av testen:** Hver `test.sh` skal gi PASS når du kjører den med det
 > ekte verktøyet som kandidat, f.eks. `./03-wc/test.sh wc`. Da vet du at testen selv er
