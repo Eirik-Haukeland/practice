@@ -7,12 +7,14 @@ og golden-tester ligger i [`../practise-project-descriptions/`](../practise-proj
 
 Hver verktøy bor i egen mappe med egen `go.mod`, så de er uavhengige og kan bygges/kjøres isolert:
 
+Mappenavnene følger samme `xx-navn`-nummerering som beskrivelsene, så de står i par:
+
 ```
 go/
-  echo/
-    go.mod        <- module echo  (go 1.22+)
+  01-echo/
+    go.mod        <- module 01-echo  (go 1.22+)
     main.go       <- package main
-  cat/
+  02-cat/
     go.mod
     main.go
   ...
@@ -22,8 +24,8 @@ go/
 
 ```bash
 cd go
-mkdir echo && cd echo
-go mod init echo
+mkdir 01-echo && cd 01-echo
+go mod init 01-echo
 $EDITOR main.go
 ```
 
@@ -45,13 +47,13 @@ func main() {
 ### Kjør og test
 
 ```bash
-# Kjør direkte under utvikling
-cd /home/eirik/Projects/personal/fag_uke/practice/go/echo
+# Kjør direkte under utvikling (fra repo-rota)
+cd go/01-echo
 go run . hei verden
 
 # Golden-test: bygg binær til absolutt sti, kjør testen fra repo-rota
-cd /home/eirik/Projects/personal/fag_uke/practice
-go build -o /tmp/echo ./go/echo
+cd ../..        # tilbake til repo-rota
+go build -o /tmp/echo ./go/01-echo
 ./practise-project-descriptions/01-echo/test.sh /tmp/echo
 ```
 

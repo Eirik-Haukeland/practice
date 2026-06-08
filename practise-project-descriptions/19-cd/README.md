@@ -48,9 +48,9 @@ Dette er en **oppførsels-test** (ikke ren diff mot ekte verktøy — `cd` er en
 uten stdout). Testen sammenligner din utskrift mot `(cd <arg> && pwd)` beregnet i bash.
 
 ```bash
-cd /home/eirik/Projects/personal/fag_uke/practice
-go build -o /tmp/cd ./go/cd
+# stå i repo-rota
+go build -o /tmp/cd ./go/19-cd
 ./practise-project-descriptions/19-cd/test.sh /tmp/cd
 ```
 
-Default kandidat er `go run .` om du dropper argumentet og står i `go/cd/`.
+Default kandidat er `go run .` om du dropper argumentet og står i `go/19-cd/`.

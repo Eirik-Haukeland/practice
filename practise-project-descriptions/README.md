@@ -2,17 +2,17 @@
 
 Gjenskap klassiske Unix CLI-verktøy fra bunnen i Go. Verktøyene er ordnet i en
 progresjon der hvert prosjekt introduserer nye Go-konsepter og bygger på det forrige.
-Beskrivelsene og testene ligger her; selve Go-koden skriver du selv i `../go/<verktøy>/`.
+Beskrivelsene og testene ligger her; selve Go-koden skriver du selv i `../go/<nn>-<verktøy>/`.
 
 ## Slik jobber du
 
 1. Velg neste nummererte mappe.
 2. Les `README.md` — den har spec, Go-læringsmål, test-scenarioer og stretch-mål.
-3. Skriv Go-implementasjonen i `../go/<verktøy>/` (én modul per verktøy — se `../go/README.md`).
+3. Skriv Go-implementasjonen i `../go/<nn>-<verktøy>/` (én modul per verktøy — se `../go/README.md`).
 4. Bygg en binær og kjør golden-testen. Stå i repo-rota (`practice/`):
    ```bash
-   cd /home/eirik/Projects/personal/fag_uke/practice
-   go build -o /tmp/echo ./go/echo
+   # stå i repo-rota
+   go build -o /tmp/echo ./go/01-echo
    ./practise-project-descriptions/01-echo/test.sh /tmp/echo
    ```
    Testen kjører binæren din og systemets ekte verktøy mot samme input og `diff`-er output.
