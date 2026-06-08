@@ -92,7 +92,11 @@ func escape(text string, sequences []string, segmentDictionary map[string]string
 		splitText := strings.Split(text, currentSequence)
 		for len(splitText) >= i+1 {
 			currentTextSegment := splitText[i]
-			escape(currentTextSegment, remainingSequences, segmentDictionary)
+			if len(remainingSequences) >= 1 {
+				escape(currentTextSegment, remainingSequences, segmentDictionary)
+			} else {
+				fmt.Print(currentTextSegment)
+			}
 			if len(splitText) > i+1 {
 				fmt.Print(segmentDictionary[currentSequence])
 			}
