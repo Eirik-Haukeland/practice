@@ -1,28 +1,63 @@
 package main
 
 import (
-	"flag"
 	"fmt"
+	"os"
 	"strings"
 )
 
 func main() {
-	flag_no_new_line := flag.Bool("n", false, "passing -n will make echo stop adding a new line")
-	flag_allow_char_escape := flag.Bool("e", false, "passing -e will enable character escaping")
-	flag_disable_char_escape := flag.Bool("E", false, "passing -E will disable character escaping this is default behavior")
-	flag.Parse()
+	args := os.Args
 
-	no_new_line := *flag_no_new_line
-	var allow_escapes bool
-	if !*flag_disable_char_escape && *flag_allow_char_escape {
-		allow_escapes = true
-	} else {
-		allow_escapes = false
+	noNewLine := false
+	allowEscapes := false
+	index := 1
+itsText:
+	for len(args) >= index {
+		flag := args[index]
+		if !strings.HasPrefix(flag, "-") {
+			break itsText
+		}
+
+		possibleNoNewLine := noNewLine
+		possibleAllowEscapes := allowEscapes
+		possibleFlags := []rune(flag)
+		runeDash := []rune("-")[0]
+		runen := []rune("n")[0]
+		runee := []rune("e")[0]
+		runeE := []rune("E")[0]
+		pastFirstDash := false
+		for _, currentLetter := range possibleFlags {
+			if currentLetter == runen {
+				possibleNoNewLine = true
+			} else if currentLetter == runee {
+				possibleAllowEscapes = true
+			} else if currentLetter == runeE {
+				possibleAllowEscapes = false
+			} else if currentLetter == runeDash {
+				if pastFirstDash {
+					break itsText
+				}
+				pastFirstDash = true
+				continue
+			} else {
+				break itsText
+			}
+		}
+
+		noNewLine = possibleNoNewLine
+		allowEscapes = possibleAllowEscapes
+		index++
 	}
 
-	text := strings.Join(flag.Args(), " ")
+	var text string
+	if len(args) > index {
+		text = strings.Join(args[index:], " ")
+	} else {
+		text = ""
+	}
 
-	if allow_escapes {
+	if allowEscapes {
 		segments := []string{"\\t", "\\\\", "\\n", "\\a", "\\b", "\\r", "\\v", "\\f"}
 		segmentDictionary := map[string]string{
 			"\\t":  "\t",
@@ -38,7 +73,7 @@ func main() {
 	} else {
 		fmt.Print(text)
 	}
-	if !no_new_line {
+	if !noNewLine {
 		fmt.Print("\n")
 	}
 }
@@ -68,5 +103,4 @@ func escape(text string, sequences []string, segmentDictionary map[string]string
 	} else {
 		fmt.Print(text)
 	}
-
 }
