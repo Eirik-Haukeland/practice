@@ -34,4 +34,38 @@ check "-b a (alle linjer)"        "$tmp/mixed" -b a
 check "-b t (kun ikke-tomme)"     "$tmp/mixed" -b t
 check "-b n (ingen)"              "$tmp/mixed" -b n
 
-echo "Alle tester bestått."
+# --- STRETCH-MÅL ---------------------------------------------------------
+# Valgfrie mål fra README. Teller IKKE mot bestått/feilet. Samme whitespace-
+# normalisering (tab -> space, squeeze) som de påkrevde casene.
+stretch_fail=0
+run_stretch() {
+  local name="$1" input="$2"; shift 2
+  local got exp
+  got=$($CAND "$@" < "$input" 2>/dev/null | tr '\t' ' ' | tr -s ' ') || true
+  exp=$($REF  "$@" < "$input" 2>/dev/null | tr '\t' ' ' | tr -s ' ') || true
+  if [[ "$got" == "$exp" ]]; then
+    echo "STRETCH PASS $name"
+  else
+    echo "STRETCH FAIL $name  (valgfritt)"
+    stretch_fail=$((stretch_fail + 1))
+  fi
+}
+
+echo ""
+echo "--- STRETCH-MÅL (valgfritt — påvirker ikke om testen består) ---"
+# -w N: egendefinert feltbredde
+run_stretch "-w egendefinert bredde"   "$tmp/mixed" -w 3
+# -s STR: egendefinert skilletegn
+run_stretch "-s egendefinert skille"   "$tmp/mixed" -s ':: '
+# -v N: startnummer
+run_stretch "-v startnummer"           "$tmp/mixed" -v 5
+# -i N: inkrement
+run_stretch "-i inkrement"             "$tmp/mixed" -i 10
+
+echo ""
+echo "Alle påkrevde tester bestått."
+if [ "$stretch_fail" -ne 0 ]; then
+  echo "STRETCH:  $stretch_fail valgfrie case ikke bestått ennå (greit — ikke påkrevd)"
+else
+  echo "STRETCH:  alle bestått"
+fi

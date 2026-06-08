@@ -45,7 +45,41 @@ else
   fi
 fi
 
+# --- STRETCH-MÅL ---------------------------------------------------------
+# Valgfrie mål fra README. Disse teller IKKE mot bestått/feilet — de vises bare
+# som STRETCH PASS/FAIL slik at du ser hva som gjenstår av ekstra-funksjonalitet.
+printf 'x\n\n\n\ny\n\n\nz\n' > "$tmp/blanks"
+printf 'a\tb\tc\n'           > "$tmp/tabs"
+stretch_fail=0
+run_stretch() {
+  local name="$1"; local args="$2"
+  if diff <(eval "$CAND $args" 2>/dev/null) <(eval "$REF $args" 2>/dev/null) >/dev/null 2>&1; then
+    echo "STRETCH PASS $name"
+  else
+    echo "STRETCH FAIL $name  (valgfritt)"
+    stretch_fail=$((stretch_fail + 1))
+  fi
+}
+
+echo ""
+echo "--- STRETCH-MÅL (valgfritt — påvirker ikke om testen består) ---"
+# - som filnavn: les stdin midt i en filliste
+run_stretch "dash-stdin"   "$tmp/a - $tmp/b < $tmp/c"
+# -b: nummerer kun ikke-tomme linjer
+run_stretch "number-nonblank" "-b $tmp/blanks"
+# -s: komprimer flere tomme linjer til én
+run_stretch "squeeze-blank"   "-s $tmp/blanks"
+# -T: vis tabulatorer som ^I
+run_stretch "show-tabs"       "-T $tmp/tabs"
+
+echo ""
 if [ "$fail" -ne 0 ]; then
+  echo "PÅKREVD: FEILET (se FAIL over)"
   exit 1
 fi
-echo "ALLE TESTER PASS"
+echo "PÅKREVD: alle bestått"
+if [ "$stretch_fail" -ne 0 ]; then
+  echo "STRETCH:  $stretch_fail valgfrie case ikke bestått ennå (greit — ikke påkrevd)"
+else
+  echo "STRETCH:  alle bestått"
+fi

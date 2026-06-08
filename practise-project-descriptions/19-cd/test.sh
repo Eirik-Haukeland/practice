@@ -41,5 +41,51 @@ else
   echo "PASS feil"
 fi
 
-[ $fail -eq 0 ] || exit 1
+# --- STRETCH-MÅL ---------------------------------------------------------
+# Valgfrie mål fra README. Teller IKKE mot bestått/feilet — vises kun som
+# STRETCH PASS/FAIL. Samme check-mekanisme som de påkrevde casene
+# (sammenlign kandidatens stdout mot en referanse beregnet i bash).
+stretch_fail=0
+check_stretch() { # check_stretch <navn> <forventet> <faktisk>
+  if [ "$2" = "$3" ]; then
+    echo "STRETCH PASS $1"
+  else
+    echo "STRETCH FAIL $1  (valgfritt)"
+    echo "  forventet: $2"
+    echo "  faktisk:   $3"
+    stretch_fail=$((stretch_fail + 1))
+  fi
+}
+
+echo ""
+echo "--- STRETCH-MÅL (valgfritt — påvirker ikke om testen består) ---"
+
+# Symlenke for -P/-L-testene: link -> sub
+ln -s "$tmp/sub" "$tmp/link"
+
+# Stretch 1: cd - skal skrive ut mappa den byttet til (gjør det samme som
+# ekte `cd -`, som ekko-er målmappa). Referanse: OLDPWD selv.
+check_stretch "dash-prints-dir" "$tmp/sub" "$(OLDPWD="$tmp/sub" $CAND -)"
+
+# Stretch 2: -P (fysisk sti) — løs opp symlenker.
+# Referanse: (cd -P link && pwd -P).
+want_P=$(cd "$tmp/link" && pwd -P)
+check_stretch "physical-P" "$want_P" "$($CAND -P "$tmp/link")"
+
+# Stretch 3: -L (logisk sti) — behold symlenke-stien.
+check_stretch "logical-L" "$tmp/link" "$($CAND -L "$tmp/link")"
+
+# Stretch 4: CDPATH — finn relativt mål via mappene i $CDPATH.
+mkdir -p "$tmp/base/target"
+want_cdpath=$(cd "$tmp/base/target" && pwd)
+check_stretch "cdpath" "$want_cdpath" "$(cd "$tmp" && CDPATH="$tmp/base" $CAND target)"
+
+if [ $fail -ne 0 ]; then
+  exit 1
+fi
 echo "ALLE TESTER PASS"
+if [ "$stretch_fail" -ne 0 ]; then
+  echo "STRETCH:  $stretch_fail valgfrie case ikke bestått ennå (greit — ikke påkrevd)"
+else
+  echo "STRETCH:  alle bestått"
+fi

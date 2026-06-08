@@ -57,7 +57,84 @@ else
   fail=1
 fi
 
+# --- STRETCH-MÅL ---------------------------------------------------------
+# Valgfrie mål fra README. Teller IKKE mot bestått/feilet — vises kun som
+# STRETCH PASS/FAIL. Oppførsels-baserte (samme stil som -f-casen over):
+# start kandidaten i bakgrunnen, manipuler filer, sjekk utdata.
+stretch_fail=0
+
+echo ""
+echo "--- STRETCH-MÅL (valgfritt — påvirker ikke om testen består) ---"
+
+# fsnotify er en intern impl-detalj (polling vs. hendelsesdrevet) som ikke er
+# eksternt observerbar — kan ikke testes deterministisk via stdout.
+echo "STRETCH SKIP fsnotify-backend  (intern impl-detalj, ikke eksternt observerbar)"
+
+# Stretch 1: truncation/rotasjon — filen krymper, så vokser igjen.
+tlog="$tmp/trunc.log"
+tout="$tmp/trunc.out"
+printf 'gammel-1\ngammel-2\n' > "$tlog"
+$CAND -f "$tlog" > "$tout" 2>/dev/null &
+tpid=$!
+sleep 1.5
+: > "$tlog"            # truncate
+sleep 0.5
+printf 'etter-trunc\n' >> "$tlog"
+sleep 1.5
+kill "$tpid" 2>/dev/null || true
+wait "$tpid" 2>/dev/null || true
+if grep -q 'etter-trunc' "$tout"; then
+  echo "STRETCH PASS truncation"
+else
+  echo "STRETCH FAIL truncation  (valgfritt)"
+  stretch_fail=$((stretch_fail + 1))
+fi
+
+# Stretch 2: følg flere filer med "==> filnavn <==" header per fil.
+flog1="$tmp/multi1.log"; flog2="$tmp/multi2.log"
+mout="$tmp/multi.out"
+printf 'fil1-start\n' > "$flog1"
+printf 'fil2-start\n' > "$flog2"
+$CAND -f "$flog1" "$flog2" > "$mout" 2>/dev/null &
+mpid=$!
+sleep 1.5
+printf 'fil1-ny\n' >> "$flog1"
+printf 'fil2-ny\n' >> "$flog2"
+sleep 1.5
+kill "$mpid" 2>/dev/null || true
+wait "$mpid" 2>/dev/null || true
+if grep -q 'fil1-ny' "$mout" && grep -q 'fil2-ny' "$mout" \
+   && grep -qE '==>.*multi1\.log.*<==' "$mout" \
+   && grep -qE '==>.*multi2\.log.*<==' "$mout"; then
+  echo "STRETCH PASS multi-file-header"
+else
+  echo "STRETCH FAIL multi-file-header  (valgfritt)"
+  stretch_fail=$((stretch_fail + 1))
+fi
+
+# Stretch 3: -F tåler at filen ennå ikke finnes og venter på opprettelse.
+Flog="$tmp/late.log"   # finnes ikke ennå
+Fout="$tmp/late.out"
+$CAND -F "$Flog" > "$Fout" 2>/dev/null &
+Fpid=$!
+sleep 1.5
+printf 'opprettet-senere\n' > "$Flog"
+sleep 1.5
+kill "$Fpid" 2>/dev/null || true
+wait "$Fpid" 2>/dev/null || true
+if grep -q 'opprettet-senere' "$Fout"; then
+  echo "STRETCH PASS F-wait-for-create"
+else
+  echo "STRETCH FAIL F-wait-for-create  (valgfritt)"
+  stretch_fail=$((stretch_fail + 1))
+fi
+
 if [[ "$fail" -ne 0 ]]; then
   exit 1
 fi
 echo "ALL PASS"
+if [[ "$stretch_fail" -ne 0 ]]; then
+  echo "STRETCH:  $stretch_fail valgfrie case ikke bestått ennå (greit — ikke påkrevd)"
+else
+  echo "STRETCH:  alle bestått"
+fi
