@@ -93,13 +93,13 @@ notAFlag:
 				flags.showTabs = true
 			} else if currentLetter == runeDash {
 				if pastFirstDash {
-					fmt.Fprintln(os.Stderr, "ln 88 cat: invalid option -- \"-\"")
+					fmt.Fprintln(os.Stderr, "cat: invalid option -- \"-\"")
 					os.Exit(1)
 				}
 				pastFirstDash = true
 				continue
 			} else {
-				fmt.Fprintf(os.Stderr, "ln 94 cat: invalid option -- \"%v\"\n", currentLetter)
+				fmt.Fprintf(os.Stderr, "cat: invalid option -- \"%v\"\n", currentLetter)
 				os.Exit(1)
 			}
 		}
@@ -113,7 +113,7 @@ notAFlag:
 func readFile(fileName string) (int, *os.File) {
 	file, err := os.Open(fileName)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "ln 108 cat:", err)
+		fmt.Fprintln(os.Stderr, "cat:", err)
 		return 1, nil
 	}
 
@@ -166,7 +166,7 @@ func prosessFile(file *os.File, flags Flags) int {
 
 	scannerError := scanner.Err()
 	if scannerError != nil {
-		fmt.Fprintf(os.Stderr, "ln 159 cat:", scannerError)
+		fmt.Fprintf(os.Stderr, "cat:", scannerError)
 		return 1
 	}
 
